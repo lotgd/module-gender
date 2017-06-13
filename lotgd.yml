@@ -1,0 +1,5 @@
+entityNamespace: "LotGD\\Module\\Gender\\"
+subscriptionPatterns:
+    - "#h/lotgd/module-new-day/before#"
+    - "#h/lotgd/core/navigate-to/lotgd/module-gender/choose#"
+    - "#h/lotgd/core/navigate-to/lotgd/module-gender/select#"
