@@ -16,10 +16,6 @@
   },
   "repositories": [
     {
-      "type": "composer",
-      "url": "http://code.lot.gd"
-    },
-    {
       "type": "vcs",
       "url": "https://github.com/lotgd/core.git"
     },
@@ -30,10 +26,14 @@
     {
       "type": "vcs",
       "url": "https://github.com/lotgd/module-village.git"
+    },
+    {
+      "type": "composer",
+      "url": "http://code.lot.gd"
     }
   ],
   "require": {
-    "lotgd/core": "dev-feature/action-params as 0.3.1-alpha",
+    "lotgd/core": "^0.3.1-alpha",
     "lotgd/module-village": "^0.3.1-alpha",
     "lotgd/module-new-day": "dev-master"
   },

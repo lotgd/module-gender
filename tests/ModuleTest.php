@@ -5,6 +5,7 @@ use Monolog\Logger;
 use Monolog\Handler\NullHandler;
 
 use LotGD\Core\Configuration;
+use LotGD\Core\GameBuilder;
 use LotGD\Core\Game;
 use LotGD\Core\Models\Character;
 use LotGD\Core\Models\Module as ModuleModel;
@@ -36,7 +37,12 @@ class ModuleTest extends ModelTestCase
         $logger->pushHandler(new NullHandler());
 
         // Create a Game object for use in these tests.
-        $this->g = new Game(new Configuration(getenv('LOTGD_TESTS_CONFIG_PATH')), $logger, $this->getEntityManager(), implode(DIRECTORY_SEPARATOR, [__DIR__, '..']));
+        $this->g = (new GameBuilder())
+            ->withConfiguration(new Configuration(getenv('LOTGD_TESTS_CONFIG_PATH')))
+            ->withLogger($logger)
+            ->withEntityManager($this->getEntityManager())
+            ->withCwd(implode(DIRECTORY_SEPARATOR, [__DIR__, '..']))
+            ->create();
 
         // Register and unregister before/after each test, since
         // handleEvent() calls may expect the module be registered (for example,
