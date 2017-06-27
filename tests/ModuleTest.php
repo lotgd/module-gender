@@ -9,7 +9,7 @@ use LotGD\Core\GameBuilder;
 use LotGD\Core\Game;
 use LotGD\Core\Models\Character;
 use LotGD\Core\Models\Module as ModuleModel;
-use LotGD\Module\NewDay\Tests\ModuleTestCase as ModelTestCase;
+use LotGD\Core\Tests\ModelTestCase as ModelTestCase;
 
 use LotGD\Module\Gender\Module;
 
