@@ -85,7 +85,7 @@ class ModuleTest extends ModelTestCase
     {
         /** @var Game $game */
         $game = $this->g;
-        $character = $this->getEntityManager()->getRepository(Character::class)->findById(1)[0];
+        $character = $this->getEntityManager()->getRepository(Character::class)->find("10000000-0000-0000-0000-000000000001");
         $game->setCharacter($character);
         $v = $game->getViewpoint();
 
