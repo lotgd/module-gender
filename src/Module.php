@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace LotGD\Module\Gender;
 
-use LotGD\Core\Action;
-use LotGD\Core\ActionGroup;
 use LotGD\Core\Game;
 use LotGD\Core\Events\EventContext;
 use LotGD\Core\Module as ModuleInterface;
@@ -15,7 +13,6 @@ use LotGD\Core\Models\Viewpoint;
 use LotGD\Module\Gender\SceneTemplates\GenderChooseScene;
 use LotGD\Module\Gender\SceneTemplates\GenderSetScene;
 use LotGD\Module\NewDay\Module as NewDayModule;
-use LotGD\Module\NewDay\SceneTemplates\ContinueScene;
 
 const MODULE = "lotgd/module-gender";
 
@@ -36,9 +33,9 @@ class Module implements ModuleInterface {
         if ($event === NewDayModule::HookBeforeNewDay) {
             $context = self::handleHookBeforeNewDay($g, $context);
         } elseif ($event === "h/lotgd/core/navigate-to/" . self::SceneGenderChoose) {
-            $context = self::handleSceneChoose($g, $context);
+            $context = GenderChooseScene::handleEvent($g, $context);
         } elseif ($event === "h/lotgd/core/navigate-to/" . self::SceneGenderSelect) {
-            $context = self::handleSceneSelect($g, $context);
+            $context = GenderSetScene::handleEvent($g, $context);
         }
 
         return $context;
@@ -54,63 +51,6 @@ class Module implements ModuleInterface {
                     ->findOneBy(["template" => GenderChooseScene::class])
             );
         }
-
-        return $context;
-    }
-
-    private static function handleSceneChoose(Game $g, EventContext $context): EventContext
-    {
-        /** @var Viewpoint $v */
-        $v = $context->getDataField("viewpoint");
-        $destinationId = $g->getEntityManager()
-            ->getRepository(Scene::class)
-            ->findOneBy(["template" => GenderSetScene::class])
-            ->getId();
-
-        $actionF = new Action($destinationId, "♀ Female ", ["gender" => self::GenderFemale]);
-        $actionM = new Action($destinationId, "♂ Male", ["gender" => self::GenderMale]);
-
-        $group = new ActionGroup(self::Module, "Choose", 0);
-        $group->setActions([$actionF, $actionM]);
-
-        // Need to have better api here
-        $groups = $v->getActionGroups();
-        $groups[] = $group;
-        $v->setActionGroups($groups);
-
-        return $context;
-    }
-
-    private static function handleSceneSelect(Game $g, EventContext $context): EventContext
-    {
-        $gender = $context->getDataField("parameters")["gender"];
-        $continue = true;
-
-        switch($gender) {
-            case self::GenderFemale:
-            case self::GenderMale:
-                $g->getCharacter()->setProperty(self::CharacterPropertyGender, $gender);
-                break;
-
-            default:
-                // You should not end up here, but still let us cover it
-                $continue = false;
-        }
-
-        if ($continue) {
-            // Redirect to SceneContinue to continue the new day
-            $scene = $g->getEntityManager()
-                ->getRepository(Scene::class)
-                ->findOneBy(["template" => ContinueScene::class]);
-        } else {
-            // Redirect to GenderChoose, since the gender looks invalid...
-            // You should not end up here though, but you might!
-            $scene = $g->getEntityManager()
-                ->getRepository(Scene::class)
-                ->findOneBy(["template" => GenderChooseScene::class]);
-        }
-
-        $context->setDataField("redirect", $scene);
 
         return $context;
     }
