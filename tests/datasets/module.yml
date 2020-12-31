@@ -12,7 +12,7 @@ scenes:
         id: "20000000-0000-0000-0000-000000000001"
         title: "Village"
         description: "You arrive in a village."
-        template: 'LotGD\\Module\\Village\\SceneTemplates\\VillageScene'
+        template: "LotGD\\Module\\Village\\SceneTemplates\\VillageScene"
     -
         id: "20000000-0000-0000-0000-000000000002"
         title: "Another Scene"
@@ -52,11 +52,9 @@ modules:
     -
         library: 'lotgd/module-village'
         createdAt: "2016-03-06"
-module_properties:
     -
-        owner: "lotgd/module-village"
-        propertyName: "lotgd/module-village/scenes"
-        propertyValue: "i:1;"
+        library: 'lotgd/module-new-day'
+        createdAt: "2016-03-06"
 event_subscriptions:
     -
         pattern: "/h\\/lotgd\\/core\\/default-scene/"
