@@ -114,34 +114,15 @@ class Module implements ModuleInterface {
 
         return $context;
     }
-
-    private static function getScenes()
-    {
-        $choose = Scene::create([
-            "template" => new SceneTemplate(GenderChooseScene::class, self::Module),
-            "title" => "Which gender do you have?",
-            "description" => "You are looking at your flickering shadow in a cold, empty room. The shadow has no face, "
-                ."but still, it talks. «I wonder... What's your gender?», it asks you, leaving you questioning yourself."
-        ]);
-
-        $set = Scene::create([
-            "template" => new SceneTemplate(GenderSetScene::class, self::Module),
-            "title" => "You have chosen your gender.",
-            "description" => "Your shadow makes an agreeing gesture - or was it you? You don't know, you don't care. "
-                ."And you certainly should not see this text."
-        ]);
-
-        $choose->getTemplate()->setUserAssignable(false);
-        $set->getTemplate()->setUserAssignable(false);
-
-        return [$choose, $set];
-    }
     
     public static function onRegister(Game $g, ModuleModel $module)
     {
         $em = $g->getEntityManager();
 
-        $newScenes = self::getScenes();
+        $newScenes = [
+            GenderChooseScene::getScaffold(),
+            GenderSetScene::getScaffold(),
+        ];
 
         foreach ($newScenes as $scene) {
             $em->persist($scene);
