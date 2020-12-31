@@ -1,15 +1,13 @@
 <?php
 declare(strict_types=1);
 
-use Monolog\Logger;
-use Monolog\Handler\NullHandler;
-
 use LotGD\Core\Configuration;
 use LotGD\Core\GameBuilder;
 use LotGD\Core\Game;
 use LotGD\Core\Models\Character;
 use LotGD\Core\Models\Module as ModuleModel;
 use LotGD\Core\Tests\ModelTestCase as ModelTestCase;
+use Symfony\Component\Yaml\Yaml;
 
 use LotGD\Module\Gender\Module;
 
@@ -19,9 +17,9 @@ class ModuleTest extends ModelTestCase
 
     protected $dataset = "module";
 
-    protected function getDataSet(): \PHPUnit_Extensions_Database_DataSet_YamlDataSet
+    public function getDataSet(): array
     {
-        return new \PHPUnit_Extensions_Database_DataSet_YamlDataSet(implode(DIRECTORY_SEPARATOR, [__DIR__, 'datasets', $this->dataset . '.yml']));
+        return Yaml::parseFile(implode(DIRECTORY_SEPARATOR, [__DIR__, 'datasets', 'module.yml']));
     }
 
     public function setUp(): void
