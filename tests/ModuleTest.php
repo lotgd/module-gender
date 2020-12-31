@@ -51,6 +51,31 @@ class ModuleTest extends ModelTestCase
         parent::tearDown();
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
+    public function testUnregister()
+    {
+        Module::onUnregister($this->g, $this->moduleModel);
+        $m = $this->getEntityManager()->getRepository(ModuleModel::class)->find(self::Library);
+        $m->delete($this->getEntityManager());
+
+        // Assert that databases are the same before and after.
+        // TODO for module author: update list of tables below to include the
+        // tables you modify during registration/unregistration.
+        $tableList = [
+            'characters', 'scenes', 'modules', 'scene_connections', "module_properties"
+        ];
+
+        $this->assertDataWasKeptIntact($tableList);
+
+        // Since tearDown() contains an onUnregister() call, this also tests
+        // double-unregistering, which should be properly supported by modules.
+    }
+
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testHandleUnknownEvent()
     {
         // Always good to test a non-existing event just to make sure nothing happens :).
