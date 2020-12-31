@@ -10,8 +10,12 @@ use LotGD\Core\Events\EventContext;
 use LotGD\Core\Module as ModuleInterface;
 use LotGD\Core\Models\Module as ModuleModel;
 use LotGD\Core\Models\Scene;
+use LotGD\Core\Models\SceneTemplate;
 use LotGD\Core\Models\Viewpoint;
+use LotGD\Module\Gender\SceneTemplates\GenderChooseScene;
+use LotGD\Module\Gender\SceneTemplates\GenderSetScene;
 use LotGD\Module\NewDay\Module as NewDayModule;
+use LotGD\Module\NewDay\SceneTemplates\ContinueScene;
 
 const MODULE = "lotgd/module-gender";
 
@@ -47,7 +51,7 @@ class Module implements ModuleInterface {
                 "redirect",
                 $g->getEntityManager()
                     ->getRepository(Scene::class)
-                    ->findOneBy(["template" => self::SceneGenderChoose])
+                    ->findOneBy(["template" => GenderChooseScene::class])
             );
         }
 
@@ -60,7 +64,7 @@ class Module implements ModuleInterface {
         $v = $context->getDataField("viewpoint");
         $destinationId = $g->getEntityManager()
             ->getRepository(Scene::class)
-            ->findOneBy(["template" => self::SceneGenderSelect])
+            ->findOneBy(["template" => GenderSetScene::class])
             ->getId();
 
         $actionF = new Action($destinationId, "♀ Female ", ["gender" => self::GenderFemale]);
@@ -97,13 +101,13 @@ class Module implements ModuleInterface {
             // Redirect to SceneContinue to continue the new day
             $scene = $g->getEntityManager()
                 ->getRepository(Scene::class)
-                ->findOneBy(["template" => NewDayModule::SceneContinue]);
+                ->findOneBy(["template" => ContinueScene::class]);
         } else {
             // Redirect to GenderChoose, since the gender looks invalid...
             // You should not end up here though, but you might!
             $scene = $g->getEntityManager()
                 ->getRepository(Scene::class)
-                ->findOneBy(["template" => self::SceneGenderChoose]);
+                ->findOneBy(["template" => GenderChooseScene::class]);
         }
 
         $context->setDataField("redirect", $scene);
@@ -114,61 +118,65 @@ class Module implements ModuleInterface {
     private static function getScenes()
     {
         $choose = Scene::create([
-            "template" => self::SceneGenderChoose,
+            "template" => new SceneTemplate(GenderChooseScene::class, self::Module),
             "title" => "Which gender do you have?",
             "description" => "You are looking at your flickering shadow in a cold, empty room. The shadow has no face, "
-                ."but still, it talks. «I wander... What's your gender?», it asks you, leaving you questioning yourself."
+                ."but still, it talks. «I wonder... What's your gender?», it asks you, leaving you questioning yourself."
         ]);
 
-        $select = Scene::create([
-            "template" => self::SceneGenderSelect,
+        $set = Scene::create([
+            "template" => new SceneTemplate(GenderSetScene::class, self::Module),
             "title" => "You have chosen your gender.",
             "description" => "Your shadow makes an agreeing gesture - or was it you? You don't know, you don't care. "
                 ."And you certainly should not see this text."
         ]);
 
-        return [$choose, $select];
+        $choose->getTemplate()->setUserAssignable(false);
+        $set->getTemplate()->setUserAssignable(false);
+
+        return [$choose, $set];
     }
     
     public static function onRegister(Game $g, ModuleModel $module)
     {
-        // Register new day scene and "restoration" scene.
-        $sceneIds = $module->getProperty(self::ModulePropertySceneId);
+        $em = $g->getEntityManager();
 
-        if ($sceneIds === null) {
-            [$choose, $select] = self::getScenes();
+        $newScenes = self::getScenes();
 
-            $g->getEntityManager()->persist($choose);
-            $g->getEntityManager()->persist($select);
-            $g->getEntityManager()->flush();
-
-            $module->setProperty(self::ModulePropertySceneId, [
-                self::SceneGenderChoose => $choose->getId(),
-                self::SceneGenderSelect => $select->getId()
-            ]);
-
-            // logging
-            $g->getLogger()->addNotice(sprintf(
-                "%s: Adds scenes (newday: %s, restoration: %s)",
-                self::Module,
-                $choose->getId(),
-                $select->getId()
-            ));
+        foreach ($newScenes as $scene) {
+            $em->persist($scene);
+            $em->persist($scene->getTemplate());
         }
+
+        // no flush
+
+        $g->getLogger()->notice(sprintf(
+            "%s: Adds scenes (choose: %s, set: %s)",
+            self::Module,
+            $newScenes[0]->getId(),
+            $newScenes[1]->getId()
+        ));
     }
 
     public static function onUnregister(Game $g, ModuleModel $module)
     {
-        // Unregister them again.
-        $sceneIds = $module->getProperty(self::ModulePropertySceneId);
+        $em = $g->getEntityManager();
 
-        if ($sceneIds !== null) {
-            // delete village
-            $g->getEntityManager()->getRepository(Scene::class)->find($sceneIds[self::SceneGenderChoose])->delete($g->getEntityManager());
-            $g->getEntityManager()->getRepository(Scene::class)->find($sceneIds[self::SceneGenderSelect])->delete($g->getEntityManager());
+        // Get all scenes that use our SceneTemplates. As they are not user-assignable and don't make sense without the
+        // module itself, we will freely delete all of them.
+        $registeredScenes = $em->getRepository(Scene::class)->findBy([
+            "template" => [
+                GenderChooseScene::class,
+                GenderSetScene::class,
+            ]
+        ]);
 
-            // set property to null
-            $module->setProperty(self::ModulePropertySceneId, null);
+        foreach ($registeredScenes as $scene) {
+            $template = $scene->getTemplate();
+
+            // We must remove the template and the scene.
+            $em->remove($template);
+            $em->remove($scene);
         }
     }
 }
