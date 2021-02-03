@@ -20,13 +20,11 @@ class GenderSetScene implements SceneTemplateInterface
 
     public static function getScaffold(): Scene
     {
-        $set = Scene::create([
-            "template" => new SceneTemplate(GenderSetScene::class, Module::Module),
-            "title" => "You have chosen your gender.",
-            "description" => "Your shadow makes an agreeing gesture - or was it you? You don't know, you don't care. "
-                ."And you certainly should not see this text."
-        ]);
-
+        $set = new Scene(
+            title: "Utility Scene - Gender chosen",
+            description: "You should not see this text.",
+            template: new SceneTemplate(GenderSetScene::class, Module::Module),
+        );
 
         $set->getTemplate()->setUserAssignable(false);
 

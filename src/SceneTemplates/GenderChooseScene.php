@@ -21,12 +21,14 @@ class GenderChooseScene implements SceneTemplateInterface
 
     public static function getScaffold()
     {
-        $choose = Scene::create([
-            "template" => new SceneTemplate(GenderChooseScene::class, Module::Module),
-            "title" => "Which gender do you have?",
-            "description" => "You are looking at your flickering shadow in a cold, empty room. The shadow has no face, "
-                ."but still, it talks. «I wonder... What's your gender?», it asks you, leaving you questioning yourself."
-        ]);
+        $choose = new Scene(
+            title: "Which gender do you have?",
+            description: <<<TXT
+                You are looking at your flickering shadow in a cold, empty room. The shadow has no face, 
+                but still, it talks. «I wonder... What's your gender?», it asks you, leaving you questioning yourself.
+            TXT,
+            template: new SceneTemplate(GenderChooseScene::class, Module::Module),
+        );
 
         $choose->getTemplate()->setUserAssignable(false);
 
