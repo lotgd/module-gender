@@ -2,8 +2,7 @@
   "name": "lotgd/module-gender",
   "description": "Prompts the user with a selection for a gender at a new day.",
   "type": "lotgd-module",
-  "license": "AGPL-3.0",
-  "version": "v0.6.0",
+  "license": "AGPL-3.0-or-later",
   "authors": [
     {
       "name": "Basilius Sauter",
@@ -25,9 +24,9 @@
   "prefer-stable" : true,
 
   "require": {
-    "lotgd/core": "*",
-    "lotgd/module-village": "*",
-    "lotgd/module-new-day": "*"
+    "lotgd/core": "^0.6.0",
+    "lotgd/module-village": "^0.6",
+    "lotgd/module-new-day": "^0.6"
   },
 
   "require-dev": {

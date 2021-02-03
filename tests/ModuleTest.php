@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use LotGD\Core\Configuration;
+use LotGD\Core\Events\EventContext;
 use LotGD\Core\GameBuilder;
 use LotGD\Core\Game;
 use LotGD\Core\Models\Character;
@@ -56,9 +57,6 @@ class ModuleTest extends ModelTestCase
         parent::tearDown();
     }
 
-    /**
-     * @doesNotPerformAssertions
-     */
     public function testUnregister()
     {
         Module::onUnregister($this->g, $this->moduleModel);
@@ -72,25 +70,24 @@ class ModuleTest extends ModelTestCase
             'characters', 'scenes', 'modules', 'scene_connections', "module_properties"
         ];
 
-        $this->assertDataWasKeptIntact($tableList);
+        $this->assertDataWasKeptIntact($this->getDataSet(), $this->getConnection()[0], $tableList);
 
         // Since tearDown() contains an onUnregister() call, this also tests
         // double-unregistering, which should be properly supported by modules.
     }
 
-    /**
-     * @doesNotPerformAssertions
-     */
     public function testHandleUnknownEvent()
     {
         // Always good to test a non-existing event just to make sure nothing happens :).
-        $context = new \LotGD\Core\Events\EventContext(
+        $context = new EventContext(
             "e/lotgd/tests/unknown-event",
             "none",
             \LotGD\Core\Events\EventContextData::create([])
         );
 
-        Module::handleEvent($this->g, $context);
+        $newContext = Module::handleEvent($this->g, $context);
+
+        $this->assertSame($context, $newContext);
     }
 
     public function testModuleFlow()
